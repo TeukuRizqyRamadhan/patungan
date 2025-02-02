@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../styles/SplitBillCalculator.css";
 
 type Order = {
     name: string;
     price: string;
+    splitCount: number; // Menambahkan jumlah orang yang berbagi pesanan
 };
 
 export default function SplitBillCalculator() {
@@ -13,8 +14,10 @@ export default function SplitBillCalculator() {
     const maxPeople = 10;
     const [orders, setOrders] = useState<Order[][]>(Array(2).fill([]).map(() => []));
     const [modalVisible, setModalVisible] = useState(false);
+    const [patunganModalVisible, setPatunganModalVisible] = useState(false); // Modal baru untuk Patungan 1 order
     const [orderName, setOrderName] = useState("");
     const [orderPrice, setOrderPrice] = useState("");
+    const [orderSplitCount, setOrderSplitCount] = useState(1); // Jumlah orang yang berbagi pesanan
     const [selectedPeople, setSelectedPeople] = useState<boolean[]>(Array(10).fill(false));
 
     const handlePeopleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -37,7 +40,7 @@ export default function SplitBillCalculator() {
     const addOrder = (personIndex: number) => {
         setOrders(prevOrders => {
             const newOrders = [...prevOrders];
-            newOrders[personIndex] = [...newOrders[personIndex], { name: "", price: "" }];
+            newOrders[personIndex] = [...newOrders[personIndex], { name: "", price: "", splitCount: 1 }];
             return newOrders;
         });
     };
@@ -62,9 +65,34 @@ export default function SplitBillCalculator() {
         });
     };
 
+    const handleAddToSelectedPeople = () => {
+        const newOrders = [...orders];
+        selectedPeople.forEach((isSelected, index) => {
+            if (isSelected) {
+                const formattedPrice = orderPrice.replace(/\D/g, ""); // Menghapus karakter non-digit
+                newOrders[index] = [...newOrders[index], { name: orderName, price: formattedPrice, splitCount: orderSplitCount }];
+            }
+        });
+        setOrders(newOrders);
+        setModalVisible(false);
+    };
+
+    const handleAddPatunganOrder = () => {
+        setOrders(prevOrders => {
+            const newOrders = [...prevOrders];
+            selectedPeople.forEach((isSelected, index) => {
+                if (isSelected) {
+                    const formattedPrice = orderPrice.replace(/\D/g, "");
+                    newOrders[index] = [...newOrders[index], { name: orderName, price: formattedPrice, splitCount: orderSplitCount }];
+                }
+            });
+            return newOrders;
+        });
+        setPatunganModalVisible(false);
+    };
 
     const totalPerPerson = orders.map(personOrders =>
-        personOrders.reduce((sum, order) => sum + (parseFloat(order.price.replace(/\./g, "")) || 0), 0)
+        personOrders.reduce((sum, order) => sum + (parseFloat(order.price.replace(/\./g, "")) || 0) / order.splitCount, 0)
     );
 
     const totalValue = totalPerPerson.reduce((sum, value) => sum + value, 0);
@@ -72,26 +100,46 @@ export default function SplitBillCalculator() {
     const extraCostValue = Math.round(extraCost);
     const finalTotal = totalValue + totalPPN + extraCostValue;
 
-    // Modal functionality to add orders
-    const handleAddToSelectedPeople = () => {
-        const newOrders = [...orders];
-        selectedPeople.forEach((isSelected, index) => {
-            if (isSelected) {
-                // Pastikan harga yang dimasukkan di modal diformat dengan benar
-                const formattedPrice = orderPrice.replace(/\D/g, "");  // Menghapus karakter non-digit
-                newOrders[index] = [...newOrders[index], { name: orderName, price: formattedPrice }];
-            }
-        });
-        setOrders(newOrders);
-        setModalVisible(false);
-    };
-
-
     function handleReset() {
         setPeople(2);
         setCustomPPN(11);
         setExtraCost(0);
         setOrders(Array(2).fill([]).map(() => []));
+    }
+
+    // Perhitungan otomatis ketika input pada modal Patungan 1 Order diubah
+    const calculatePatunganResults = () => {
+        const formattedPrice = orderPrice.replace(/\D/g, "");
+        const price = parseFloat(formattedPrice) || 0;
+        const totalForSplit = price / orderSplitCount;
+
+        const totalPPNForSplit = (totalForSplit * customPPN) / 100;
+        const extraCostForSplit = extraCost / people;
+
+        const totalPerPersonPatungan = totalForSplit + totalPPNForSplit + extraCostForSplit;
+
+        return {
+            totalForSplit,
+            totalPPNForSplit,
+            extraCostForSplit,
+            totalPerPersonPatungan
+        };
+    };
+
+    useEffect(() => {
+        if (patunganModalVisible) {
+            calculatePatunganResults();
+        }
+    }, [patunganModalVisible, orderPrice, orderSplitCount, customPPN, extraCost]);
+
+    const patunganResults = calculatePatunganResults();
+
+    function handleResetPatungan() {
+        setOrderName("");
+        setOrderPrice("");
+        setOrderSplitCount(1);
+        setSelectedPeople(Array(10).fill(false));
+        // setPatunganModalVisible(false);
     }
 
     return (
@@ -143,7 +191,6 @@ export default function SplitBillCalculator() {
                                     className="input"
                                     inputMode="numeric"
                                 />
-
                             </div>
                         ))}
                         <button onClick={() => addOrder(personIndex)} className="add-button">+ Tambah Pesanan</button>
@@ -160,9 +207,12 @@ export default function SplitBillCalculator() {
                 <button className="add-order-button" onClick={() => setModalVisible(true)}>
                     + Tambah Pesanan ke Semua Orang
                 </button>
+                <button className="add-order-button" onClick={() => setPatunganModalVisible(true)}>
+                    [NEW] Patungan 1 order
+                </button>
                 <button className="reset-button modern" onClick={handleReset}>Reset</button>
 
-                {/* Modal Box */}
+                {/* Modal Box untuk Tambah Pesanan ke Semua Orang */}
                 {modalVisible && (
                     <div className="modal">
                         <div className="modal-content">
@@ -202,6 +252,48 @@ export default function SplitBillCalculator() {
                             <div className="button-container">
                                 <button onClick={handleAddToSelectedPeople} className="add-button">Tambah Pesanan</button>
                                 <button onClick={() => setModalVisible(false)} className="cancel-button">Batal</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Modal Box untuk Patungan 1 order */}
+                {patunganModalVisible && (
+                    <div className="modal">
+                        <div className="modal-content">
+                            <h3>[NEW] Patungan 1 order</h3>
+                            <label>Nama Pesanan</label>
+                            <input
+                                type="text"
+                                value={orderName}
+                                onChange={(e) => setOrderName(e.target.value)}
+                                className="input"
+                            />
+                            <label>Harga</label>
+                            <input
+                                type="text"
+                                value={formatCurrency(orderPrice)}
+                                onChange={(e) => setOrderPrice(e.target.value)}
+                                className="input"
+                                inputMode="numeric"
+                            />
+                            <label>Jumlah Orang yang Berbagi Pesanan</label>
+                            <input
+                                type="number"
+                                value={orderSplitCount}
+                                onChange={(e) => setOrderSplitCount(Math.max(1, parseInt(e.target.value)))}
+                                className="input"
+                                min="1"
+                            />
+
+                            <h4>Perhitungan</h4>
+                            <p>Total Per Orang: Rp {formatCurrency(patunganResults.totalPerPersonPatungan.toFixed(0))}</p>
+                            <p>Pajak: Rp {formatCurrency(patunganResults.totalPPNForSplit.toFixed(0))}</p>
+                            <p>Biaya Lain-lain: Rp {formatCurrency(patunganResults.extraCostForSplit.toFixed(0))}</p>
+                            <p>Total Setiap Orang: Rp {formatCurrency(patunganResults.totalPerPersonPatungan.toFixed(0))}</p>
+                            <div className="button-order">
+                                <button onClick={handleResetPatungan}>Reset</button>
+                                <button onClick={() => setPatunganModalVisible(false)}>Tutup</button>
                             </div>
                         </div>
                     </div>
