@@ -56,11 +56,12 @@ export default function SplitBillCalculator() {
             const newOrders = [...prevOrders];
             newOrders[personIndex][orderIndex] = {
                 ...newOrders[personIndex][orderIndex],
-                [field]: field === "price" ? formatCurrency(value) : value,
+                [field]: field === "price" ? formatCurrency(value.replace(/\D/g, "")) : value,
             };
             return newOrders;
         });
     };
+
 
     const totalPerPerson = orders.map(personOrders =>
         personOrders.reduce((sum, order) => sum + (parseFloat(order.price.replace(/\./g, "")) || 0), 0)
@@ -76,12 +77,15 @@ export default function SplitBillCalculator() {
         const newOrders = [...orders];
         selectedPeople.forEach((isSelected, index) => {
             if (isSelected) {
-                newOrders[index] = [...newOrders[index], { name: orderName, price: orderPrice }];
+                // Pastikan harga yang dimasukkan di modal diformat dengan benar
+                const formattedPrice = orderPrice.replace(/\D/g, "");  // Menghapus karakter non-digit
+                newOrders[index] = [...newOrders[index], { name: orderName, price: formattedPrice }];
             }
         });
         setOrders(newOrders);
         setModalVisible(false);
     };
+
 
     function handleReset() {
         setPeople(2);
@@ -134,11 +138,12 @@ export default function SplitBillCalculator() {
                                 <input
                                     type="text"
                                     placeholder="Harga"
-                                    value={order.price}
+                                    value={formatCurrency(order.price)}  // Gunakan formatCurrency untuk menampilkan harga
                                     onChange={(e) => handleOrderChange(personIndex, orderIndex, "price", e.target.value)}
                                     className="input"
                                     inputMode="numeric"
                                 />
+
                             </div>
                         ))}
                         <button onClick={() => addOrder(personIndex)} className="add-button">+ Tambah Pesanan</button>
@@ -172,7 +177,7 @@ export default function SplitBillCalculator() {
                             <label>Harga</label>
                             <input
                                 type="text"
-                                value={formatCurrency(orderPrice)}
+                                value={formatCurrency(orderPrice)}  // Format harga di modal
                                 onChange={(e) => setOrderPrice(e.target.value)}
                                 className="input"
                                 inputMode="numeric"
