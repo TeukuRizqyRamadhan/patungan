@@ -68,7 +68,7 @@ export default function SplitBillCalculator() {
     return (
         <div className="container">
             <div className="card">
-                <h1 className="title">Kalkulator Patungan Makanan</h1>
+                <h1 className="title">Kalkulator Patungan</h1>
                 <label>Pajak (%)</label>
                 <input
                     type="text"
