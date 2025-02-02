@@ -251,7 +251,7 @@ export default function SplitBillCalculator() {
                 {patunganModalVisible && (
                     <div className="modal">
                         <div className="modal-content">
-                            <h3>[NEW] Patungan 1 order</h3>
+                            <h3>[NEW] Split Bill</h3>
                             <label>Nama Pesanan</label>
                             <input
                                 type="text"

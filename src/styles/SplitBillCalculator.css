@@ -47,12 +47,6 @@ h1 {
     line-height: 1.1;
 }
 
-
-button:focus,
-button:focus-visible {
-    outline: 4px auto -webkit-focus-ring-color;
-}
-
 @media (max-width: 768px) {
     .container {
         padding: 1rem;
@@ -127,48 +121,6 @@ p {
     margin: 5px 0 15px;
     border: 1px solid #ccc;
     border-radius: 5px;
-}
-
-.result {
-    font-size: 1rem;
-    font-weight: bold;
-    margin-top: 10px;
-}
-
-.cta {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-}
-
-.reset-button {
-    background-color: #f44336;
-    border: none;
-    color: white;
-    padding: 10px 20px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-}
-
-.download-button {
-    background-color: #4CAF50;
-    border: none;
-    color: white;
-    padding: 10px 20px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
 }
 
 /* modal */
