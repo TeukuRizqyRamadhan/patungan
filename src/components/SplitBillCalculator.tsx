@@ -25,8 +25,11 @@ export default function SplitBillCalculator() {
     const handlePPNChange = (e: React.ChangeEvent<HTMLInputElement>) =>
         setCustomPPN(parseFloat(e.target.value || "0"));
 
-    const handleExtraCostChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-        setExtraCost(parseFloat(e.target.value || "0"));
+    const handleExtraCostChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const formattedValue = e.target.value.replace(/\D/g, "");
+        setExtraCost(parseFloat(formattedValue || "0"));
+    };
+
 
     const addOrder = (personIndex: number) => {
         setOrders(prevOrders => {
@@ -80,10 +83,12 @@ export default function SplitBillCalculator() {
                 <label>Biaya Lain-lain (Opsional)</label>
                 <input
                     type="text"
-                    value={extraCost}
+                    value={formatCurrency(extraCost.toString())}
                     onChange={handleExtraCostChange}
                     className="input full-width"
+                    inputMode="numeric"
                 />
+
 
                 <label>Jumlah Orang</label>
                 <select value={people} onChange={handlePeopleChange} className="input full-width">
