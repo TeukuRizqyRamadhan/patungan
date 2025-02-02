@@ -77,20 +77,6 @@ export default function SplitBillCalculator() {
         setModalVisible(false);
     };
 
-    // const handleAddPatunganOrder = () => {
-    //     setOrders(prevOrders => {
-    //         const newOrders = [...prevOrders];
-    //         selectedPeople.forEach((isSelected, index) => {
-    //             if (isSelected) {
-    //                 const formattedPrice = orderPrice.replace(/\D/g, "");
-    //                 newOrders[index] = [...newOrders[index], { name: orderName, price: formattedPrice, splitCount: orderSplitCount }];
-    //             }
-    //         });
-    //         return newOrders;
-    //     });
-    //     setPatunganModalVisible(false);
-    // };
-
     const totalPerPerson = orders.map(personOrders =>
         personOrders.reduce((sum, order) => sum + (parseFloat(order.price.replace(/\./g, "")) || 0) / order.splitCount, 0)
     );
@@ -204,13 +190,17 @@ export default function SplitBillCalculator() {
                 <p className="result">Biaya Lain-lain: Rp {formatCurrency(extraCostValue.toFixed(0))}</p>
                 <p className="result final">Total Akhir: Rp {formatCurrency(finalTotal.toFixed(0))}</p>
 
-                <button className="add-order-button" onClick={() => setModalVisible(true)}>
-                    + Tambah Pesanan ke Semua Orang
-                </button>
-                <button className="add-order-button" onClick={() => setPatunganModalVisible(true)}>
-                    [NEW] Patungan 1 order
-                </button>
-                <button className="reset-button modern" onClick={handleReset}>Reset</button>
+                <div className="button-1">
+                    <button className="add-order-button" onClick={() => setModalVisible(true)}>
+                        + Tambah Pesanan Massal
+                    </button>
+                </div>
+                <div className="button-2">
+                    <button className="add-order-button" onClick={() => setPatunganModalVisible(true)}>
+                        [NEW] Split Bill
+                    </button>
+                    <button className="reset-order-button" onClick={handleReset}>Reset</button>
+                </div>
 
                 {/* Modal Box untuk Tambah Pesanan ke Semua Orang */}
                 {modalVisible && (
@@ -299,6 +289,6 @@ export default function SplitBillCalculator() {
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 }
