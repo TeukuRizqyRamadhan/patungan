@@ -22,7 +22,7 @@ export default function SplitBillCalculator() {
     };
 
     const handlePPNChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-        setCustomPPN(parseFloat(e.target.value) || 0);
+        setCustomPPN(parseFloat(e.target.value || "0"));
 
     const addOrder = (personIndex: number) => {
         setOrders(prevOrders => {
@@ -67,12 +67,11 @@ export default function SplitBillCalculator() {
                 <div className="card">
                     <label>Pajak (%)</label>
                     <input
-                        type="number"
+                        type="text"
                         value={customPPN}
                         onChange={handlePPNChange}
                         className="input full-width white-bg"
                         min="0"
-                        onKeyDown={(e) => e.preventDefault()}
                     />
 
                     <label>Jumlah Orang</label>
