@@ -77,19 +77,19 @@ export default function SplitBillCalculator() {
         setModalVisible(false);
     };
 
-    const handleAddPatunganOrder = () => {
-        setOrders(prevOrders => {
-            const newOrders = [...prevOrders];
-            selectedPeople.forEach((isSelected, index) => {
-                if (isSelected) {
-                    const formattedPrice = orderPrice.replace(/\D/g, "");
-                    newOrders[index] = [...newOrders[index], { name: orderName, price: formattedPrice, splitCount: orderSplitCount }];
-                }
-            });
-            return newOrders;
-        });
-        setPatunganModalVisible(false);
-    };
+    // const handleAddPatunganOrder = () => {
+    //     setOrders(prevOrders => {
+    //         const newOrders = [...prevOrders];
+    //         selectedPeople.forEach((isSelected, index) => {
+    //             if (isSelected) {
+    //                 const formattedPrice = orderPrice.replace(/\D/g, "");
+    //                 newOrders[index] = [...newOrders[index], { name: orderName, price: formattedPrice, splitCount: orderSplitCount }];
+    //             }
+    //         });
+    //         return newOrders;
+    //     });
+    //     setPatunganModalVisible(false);
+    // };
 
     const totalPerPerson = orders.map(personOrders =>
         personOrders.reduce((sum, order) => sum + (parseFloat(order.price.replace(/\./g, "")) || 0) / order.splitCount, 0)
