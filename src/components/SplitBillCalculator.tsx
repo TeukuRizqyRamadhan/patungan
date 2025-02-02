@@ -12,6 +12,10 @@ export default function SplitBillCalculator() {
     const [extraCost, setExtraCost] = useState(0);
     const maxPeople = 10;
     const [orders, setOrders] = useState<Order[][]>(Array(2).fill([]).map(() => []));
+    const [modalVisible, setModalVisible] = useState(false);
+    const [orderName, setOrderName] = useState("");
+    const [orderPrice, setOrderPrice] = useState("");
+    const [selectedPeople, setSelectedPeople] = useState<boolean[]>(Array(10).fill(false));
 
     const handlePeopleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const count = Math.min(parseInt(e.target.value, 10), maxPeople);
@@ -29,7 +33,6 @@ export default function SplitBillCalculator() {
         const formattedValue = e.target.value.replace(/\D/g, "");
         setExtraCost(parseFloat(formattedValue || "0"));
     };
-
 
     const addOrder = (personIndex: number) => {
         setOrders(prevOrders => {
@@ -68,6 +71,25 @@ export default function SplitBillCalculator() {
     const extraCostValue = Math.round(extraCost);
     const finalTotal = totalValue + totalPPN + extraCostValue;
 
+    // Modal functionality to add orders
+    const handleAddToSelectedPeople = () => {
+        const newOrders = [...orders];
+        selectedPeople.forEach((isSelected, index) => {
+            if (isSelected) {
+                newOrders[index] = [...newOrders[index], { name: orderName, price: orderPrice }];
+            }
+        });
+        setOrders(newOrders);
+        setModalVisible(false);
+    };
+
+    function handleReset() {
+        setPeople(2);
+        setCustomPPN(11);
+        setExtraCost(0);
+        setOrders(Array(2).fill([]).map(() => []));
+    }
+
     return (
         <div className="container">
             <div className="card">
@@ -88,7 +110,6 @@ export default function SplitBillCalculator() {
                     className="input full-width"
                     inputMode="numeric"
                 />
-
 
                 <label>Jumlah Orang</label>
                 <select value={people} onChange={handlePeopleChange} className="input full-width">
@@ -130,6 +151,56 @@ export default function SplitBillCalculator() {
                 <p className="result">Total PPN ({customPPN}%): Rp {formatCurrency(totalPPN.toFixed(0))}</p>
                 <p className="result">Biaya Lain-lain: Rp {formatCurrency(extraCostValue.toFixed(0))}</p>
                 <p className="result final">Total Akhir: Rp {formatCurrency(finalTotal.toFixed(0))}</p>
+
+                <button className="add-order-button" onClick={() => setModalVisible(true)}>
+                    + Tambah Pesanan ke Semua Orang
+                </button>
+                <button className="reset-button modern" onClick={handleReset}>Reset</button>
+
+                {/* Modal Box */}
+                {modalVisible && (
+                    <div className="modal">
+                        <div className="modal-content">
+                            <h3>Tambah Pesanan</h3>
+                            <label>Nama Pesanan</label>
+                            <input
+                                type="text"
+                                value={orderName}
+                                onChange={(e) => setOrderName(e.target.value)}
+                                className="input"
+                            />
+                            <label>Harga</label>
+                            <input
+                                type="text"
+                                value={formatCurrency(orderPrice)}
+                                onChange={(e) => setOrderPrice(e.target.value)}
+                                className="input"
+                                inputMode="numeric"
+                            />
+                            <label>Pesanan Dikirim ke</label>
+                            <div>
+                                {orders.map((_, index) => (
+                                    <div key={index} className="checkbox-container">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedPeople[index]}
+                                            onChange={() => {
+                                                const newSelectedPeople = [...selectedPeople];
+                                                newSelectedPeople[index] = !newSelectedPeople[index];
+                                                setSelectedPeople(newSelectedPeople);
+                                            }}
+                                        />
+                                        <span>Orang {index + 1}</span>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="button-container">
+                                <button onClick={handleAddToSelectedPeople} className="add-button">Tambah Pesanan</button>
+                                <button onClick={() => setModalVisible(false)} className="cancel-button">Batal</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
